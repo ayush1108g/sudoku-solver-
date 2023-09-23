@@ -1,35 +1,26 @@
 import './App.css';
 import { useState } from 'react';
 
+const dgridMaker = () => {
+  const dgrid = [];
+  for (let row = 0; row < 9; row++) {
+    dgrid[row] = [];
+    for (let col = 0; col < 9; col++) {
+      const cellValue = 0;
+      const isInitial = 0;
 
-// const defaultgrid = [
-//   [0, 0, 0, 0, 0, 0, 0, 0, 0],
-//   [0, 0, 0, 0, 0, 0, 0, 0, 0],
-//   [0, 0, 0, 0, 0, 0, 0, 0, 0],
-//   [0, 0, 0, 0, 5, 0, 0, 0, 0],
-//   [0, 0, 0, 0, 0, 0, 0, 0, 0],
-//   [0, 0, 0, 0, 0, 0, 0, 0, 0],
-//   [0, 0, 0, 0, 0, 0, 0, 0, 0],
-//   [0, 0, 0, 0, 0, 0, 0, 0, 0],
-//   [0, 0, 0, 0, 0, 0, 0, 0, 0],
-// ];
-const defaultgrid = [];
-for (let row = 0; row < 9; row++) {
-  defaultgrid[row] = [];
-  for (let col = 0; col < 9; col++) {
-    const cellValue = 0;
-    const isInitial = 0;
-
-    defaultgrid[row][col] = {
-      value: cellValue,
-      isInitial: isInitial,
-    };
+      dgrid[row][col] = {
+        value: cellValue,
+        isInitial: isInitial,
+      };
+    }
   }
+  return dgrid;
 }
 
 function App() {
-  const [grid, setGrid] = useState(defaultgrid);
-  const [grid1, setGrid1] = useState(defaultgrid);
+  const [grid, setGrid] = useState(dgridMaker());
+  const [grid1, setGrid1] = useState(dgridMaker());
   const [warn, setIswarn] = useState(false);
   const [readOnly, setReadOnly] = useState(false);
 
@@ -130,22 +121,7 @@ function App() {
     setGrid(updatedGrid);
   }
 
-  const dgridMaker = () => {
-    const dgrid = [];
-    for (let row = 0; row < 9; row++) {
-      dgrid[row] = [];
-      for (let col = 0; col < 9; col++) {
-        const cellValue = 0;
-        const isInitial = 0;
-
-        dgrid[row][col] = {
-          value: cellValue,
-          isInitial: isInitial,
-        };
-      }
-    }
-    return dgrid;
-  }
+  
   const resetHandler = () => {
     setGrid(dgridMaker());
     setGrid1(dgridMaker());
