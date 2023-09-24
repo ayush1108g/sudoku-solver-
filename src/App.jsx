@@ -1,22 +1,8 @@
 import './App.css';
 import { useState } from 'react';
+import dgridMaker from './components/defaultgridMaker';
+import { SudokuSolve, isSudokuSafe } from './components/sudokuSolve';
 
-const dgridMaker = () => {
-  const dgrid = [];
-  for (let row = 0; row < 9; row++) {
-    dgrid[row] = [];
-    for (let col = 0; col < 9; col++) {
-      const cellValue = 0;
-      const isInitial = 0;
-
-      dgrid[row][col] = {
-        value: cellValue,
-        isInitial: isInitial,
-      };
-    }
-  }
-  return dgrid;
-}
 
 function App() {
   const [grid, setGrid] = useState(dgridMaker());
@@ -25,60 +11,7 @@ function App() {
   const [errormsg, setErrormsg] = useState('   -   ');
 
 
-  function isSudokuSafe(sudoku, row, col, dat) {
-    let data = parseInt(dat);
-    for (let i = 0; i < 9; i++) {
-      if ((i !== col && sudoku[row][i].value === data) || (i !== row && sudoku[i][col].value === data)) {
-        return false;
-      }
-    }
-    const m = Math.floor(row / 3) * 3;
-    const n = Math.floor(col / 3) * 3;
-    for (let i = m; i < m + 3; i++) {
-      for (let j = n; j < n + 3; j++) {
-        if (i !== row && j !== col && sudoku[i][j].value === data) {
-          return false;
-        }
-      }
-    }
-    return true;
-  }
 
-
-  function SudokuSolve(sudoku, row, col) {
-    if (row === 9 && col === 0) {
-      return true;
-    }
-
-    let nextRow = row;
-    let nextCol = col + 1;
-    if (col + 1 === 9) {
-      nextRow += 1;
-      nextCol = 0;
-    }
-
-    if (sudoku[row][col].value !== 0) {
-      const x = SudokuSolve(sudoku, nextRow, nextCol);
-      // console.log(x,row,col);
-      return x;
-    }
-
-
-    for (let val = 1; val <= 9; val++) {
-      if (isSudokuSafe(sudoku, row, col, val)) {
-        sudoku[row][col].value = val;
-        sudoku[row][col].isInitial = 1;
-        if (SudokuSolve(sudoku, nextRow, nextCol)) {
-          return true;
-        }
-
-        sudoku[row][col].value = 0;
-        sudoku[row][col].isInitial = 0;
-      }
-    }
-
-    return false;
-  }
 
   const solveHandler = () => {
     const copiedGrid = JSON.parse(JSON.stringify(grid));
@@ -153,14 +86,14 @@ function App() {
         }
       }
     }
-    if (SudokuSolve(randGrid,0,0)) {
-      console.log(randGrid);
+    if (SudokuSolve(randGrid, 0, 0)) {
+      // console.log(randGrid);
       for (let i = 0; i < 9; i++) {
-        let count=5;
+        let count = 5;
         for (let j = 0; j < 9; j++) {
           let val = Math.floor(Math.random() * 50) % 10;
           if (val >= 9) { val = 0; }
-          if (val !== 0 && count > 0 && (j%2)===(j+val)%2) {
+          if (val !== 0 && count > 0 && (j % 2) === (j + val) % 2) {
             randGrid[i][j].value = 0;
             count--;
           }
@@ -169,9 +102,12 @@ function App() {
           }
         }
       }
+      setGrid(randGrid);
+    }
+    else {
+      randGenerator();
     }
     setReadOnly(false);
-    setGrid(randGrid);
   }
 
 
@@ -206,11 +142,11 @@ function App() {
                     min="1"
                     max="9"
                     value={cell.value || ''}
-                    readOnly={readOnly || cell.isInitial===2}
+                    readOnly={readOnly || cell.isInitial === 2}
                     onChange={(event) =>
                       handleChange(event.target.value, rowIndex, columnIndex)
                     }
-                    className={cell.isInitial === 0 ? 'black-cell' : cell.isInitial === 1 ? 'blue-cell' : cell.isInitial ===2 ? 'pink-cell' : ''}
+                    className={cell.isInitial === 0 ? 'black-cell' : cell.isInitial === 1 ? 'blue-cell' : cell.isInitial === 2 ? 'pink-cell' : ''}
                   />
                 </td>
               ))}
