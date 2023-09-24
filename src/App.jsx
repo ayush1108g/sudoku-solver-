@@ -20,9 +20,10 @@ const dgridMaker = () => {
 
 function App() {
   const [grid, setGrid] = useState(dgridMaker());
-  const [grid1, setGrid1] = useState(dgridMaker());
-  const [warn, setIswarn] = useState(false);
+  // const [grid1, setGrid1] = useState(dgridMaker());
   const [readOnly, setReadOnly] = useState(false);
+  const [errormsg, setErrormsg] = useState('   -   ');
+
 
   function isSudokuSafe(sudoku, row, col, dat) {
     let data = parseInt(dat);
@@ -43,53 +44,67 @@ function App() {
     return true;
   }
 
+
   function SudokuSolve(sudoku, row, col) {
     if (row === 9 && col === 0) {
       return true;
     }
+
     let nextRow = row;
     let nextCol = col + 1;
     if (col + 1 === 9) {
       nextRow += 1;
       nextCol = 0;
     }
+
     if (sudoku[row][col].value !== 0) {
-      return SudokuSolve(sudoku, nextRow, nextCol);
+      const x = SudokuSolve(sudoku, nextRow, nextCol);
+      // console.log(x,row,col);
+      return x;
     }
+
+
     for (let val = 1; val <= 9; val++) {
       if (isSudokuSafe(sudoku, row, col, val)) {
-        const updatedGrid = [...sudoku];
-        updatedGrid[row][col].value = val;
-        updatedGrid[row][col].isInitial = 1;
-        // sudoku[row][col] = val;
-        setGrid(updatedGrid);
+        sudoku[row][col].value = val;
+        sudoku[row][col].isInitial = 1;
         if (SudokuSolve(sudoku, nextRow, nextCol)) {
           return true;
         }
-        updatedGrid[row][col].value = 0;
-        setGrid1(updatedGrid);
-        // sudoku[row][col] = 0;
+
+        sudoku[row][col].value = 0;
+        sudoku[row][col].isInitial = 0;
       }
     }
+
     return false;
   }
 
-
   const solveHandler = () => {
-    setGrid1(grid);
-
-
-    if (checkIfData(grid1) && SudokuSolve(grid1, 0, 0)) {
-      setReadOnly(true);
-      console.log(grid1);
-      console.log(grid);
-      setGrid(grid1);
+    const copiedGrid = JSON.parse(JSON.stringify(grid));
+    const copiedGrid2 = JSON.parse(JSON.stringify(grid));
+    const isData = checkIfData(copiedGrid);
+    const checkifsolvable = SudokuSolve(copiedGrid2, 0, 0);
+    console.log(checkifsolvable);
+    if (isData) {
+      if (checkifsolvable === true) {
+        setReadOnly(true);
+        setGrid(copiedGrid2);
+      }
+      else {
+        setErrormsg('Cannot be solved');
+        setTimeout(() => {
+          setErrormsg('   -   ');
+        }, 4000);
+        console.log("Cannot be solved!");
+      }
     }
   }
-  const checkIfData = (grid1) => {
+
+  const checkIfData = (gridx) => {
     for (let i = 0; i < 9; i++) {
       for (let j = 0; j < 9; j++) {
-        if (grid1[i][j].value !== 0) {
+        if (gridx[i][j].value !== 0) {
           return true;
         }
       }
@@ -99,18 +114,17 @@ function App() {
 
 
   const handleChange = (val, i, j) => {
-    console.log(isSudokuSafe(grid, i, j, val));
+    // console.log(isSudokuSafe(grid, i, j, val));
     const inputValue = parseInt(val, 10);
     const updatedGrid = [...grid];
     const isSafe = isSudokuSafe(grid, i, j, val);
     if (!isSafe) {
-      setIswarn(true);
+      setErrormsg('Invalid');
       setTimeout(() => {
-        setIswarn(false);
+        setErrormsg('   -   ');
       }, 1000);
     }
-    if (!isNaN(inputValue) && inputValue >= 1 && inputValue <= 9 && isSafe) {
-      setIswarn(false);
+    if (!isNaN(inputValue) && inputValue >= 0 && inputValue <= 9 && isSafe) {
       updatedGrid[i][j].value = inputValue;
       updatedGrid[i][j].isInitial = 0;
     }
@@ -121,14 +135,50 @@ function App() {
     setGrid(updatedGrid);
   }
 
-  
+  const randGenerator = () => {
+    const randGrid = dgridMaker();
+    let count = 8;
+    for (let i = 0; i < 9; i++) {
+      for (let j = 0; j < 9; j++) {
+        if (count > 0) {
+          let val = Math.floor(Math.random() * 5) % 10;
+          if (val >= 9) { val = 0; }
+          if (isSudokuSafe(randGrid, i, j, val)) {
+            randGrid[i][j].value = val;
+            count--;
+          }
+          else {
+            randGrid[i][j].value = 0;
+          }
+        }
+      }
+    }
+    if (SudokuSolve(randGrid,0,0)) {
+      console.log(randGrid);
+      for (let i = 0; i < 9; i++) {
+        let count=5;
+        for (let j = 0; j < 9; j++) {
+          let val = Math.floor(Math.random() * 50) % 10;
+          if (val >= 9) { val = 0; }
+          if (val !== 0 && count > 0 && (j%2)===(j+val)%2) {
+            randGrid[i][j].value = 0;
+            count--;
+          }
+          else {
+            randGrid[i][j].isInitial = 2;
+          }
+        }
+      }
+    }
+    setReadOnly(false);
+    setGrid(randGrid);
+  }
+
+
   const resetHandler = () => {
     setGrid(dgridMaker());
-    setGrid1(dgridMaker());
+    // setGrid1(dgridMaker());
     setReadOnly(false);
-    setIswarn(false);
-    // console.log(grid);
-    // console.log(grid1);
   }
 
 
@@ -150,15 +200,16 @@ function App() {
                   }`}
                 >
                   <input
+                    id={rowIndex + columnIndex + rowIndex * (columnIndex + 1) + (rowIndex * 11) + (columnIndex * 29 * 123)}
                     type="number"
                     min="1"
                     max="9"
                     value={cell.value || ''}
-                    readOnly={readOnly}
+                    readOnly={readOnly || cell.isInitial===2}
                     onChange={(event) =>
                       handleChange(event.target.value, rowIndex, columnIndex)
                     }
-                    className={cell.isInitial === 0 ? 'normal-cell' : cell.isInitial === 1 ? 'changed-cell' : ''}
+                    className={cell.isInitial === 0 ? 'black-cell' : cell.isInitial === 1 ? 'blue-cell' : cell.isInitial ===2 ? 'pink-cell' : ''}
                   />
                 </td>
               ))}
@@ -166,9 +217,10 @@ function App() {
           ))}
         </tbody>
       </table>
-      {warn ? <p className='invalid'>INVALID</p> : <p>   -   </p>}
+      {<p className='invalid'>{errormsg}</p>}
       <div className='buttons'>
         <button onClick={resetHandler}>Reset</button>
+        <button onClick={randGenerator}>PLAY</button>
         <button onClick={solveHandler}>Solve</button>
       </div>
     </div>

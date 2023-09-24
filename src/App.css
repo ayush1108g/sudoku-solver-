@@ -78,12 +78,15 @@ button:hover {
   color: red;
 }
 
-.changed-cell {
+.blue-cell {
   color: blue;
 }
 
-.normal-cell {
+.black-cell {
   color: black;
+}
+.pink-cell{
+  color:coral;
 }
 
 input[type=number]::-webkit-inner-spin-button,
