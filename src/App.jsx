@@ -2,7 +2,7 @@ import './App.css';
 import { useState } from 'react';
 import dgridMaker from './components/defaultgridMaker';
 import { SudokuSolve, isSudokuSafe } from './components/sudokuSolve';
-
+import { motion, useTransform, useScroll, } from 'framer-motion';
 
 function App() {
   const [grid, setGrid] = useState(dgridMaker());
@@ -117,26 +117,37 @@ function App() {
     setReadOnly(false);
   }
 
+  const { scrollY } = useScroll();
+  const yHead = useTransform(scrollY, [0, 100], [0, 50]);
+  const yColor = useTransform(scrollY, [0, 100], ['#090909', '#c0862']);
 
   return (
     <div className="App">
       <br />
       <header className="App-header">
-        <h1>Sudoku Solver</h1>
+        <motion.h1
+          style={{ y: yHead, color: yColor }}
+        >Sudoku Solver</motion.h1>
       </header>
       <br /> <br />
-      <table className="sudoku-grid">
+      <motion.table
+
+        className="sudoku-grid">
         <tbody>
           {grid.map((row, rowIndex) => (
             <tr key={rowIndex}>
               {row.map((cell, columnIndex) => (
-                <td key={columnIndex} className={`${rowIndex % 3 === 0 ? 'darker-top ' : ''
-                  }${columnIndex % 3 === 0 ? 'darker-left ' : ''
-                  }${rowIndex === 8 ? 'darker-bottom ' : ''
-                  }${columnIndex === 8 ? 'darker-right ' : ''
-                  }`}
+                <motion.td
+
+                  whileHover={{ scale: 1.1, backgroundColor: '#090909' }}
+                  transition={{ type: 'spring' }}
+                  key={columnIndex} className={`${rowIndex % 3 === 0 ? 'darker-top ' : ''
+                    }${columnIndex % 3 === 0 ? 'darker-left ' : ''
+                    }${rowIndex === 8 ? 'darker-bottom ' : ''
+                    }${columnIndex === 8 ? 'darker-right ' : ''
+                    }`}
                 >
-                  <input
+                  <motion.input
                     id={rowIndex + columnIndex + rowIndex * (columnIndex + 1) + (rowIndex * 11) + (columnIndex * 29 * 123)}
                     type="number"
                     min="1"
@@ -148,17 +159,29 @@ function App() {
                     }
                     className={cell.isInitial === 0 ? 'black-cell' : cell.isInitial === 1 ? 'blue-cell' : cell.isInitial === 2 ? 'pink-cell' : ''}
                   />
-                </td>
+                </motion.td>
               ))}
             </tr>
           ))}
         </tbody>
-      </table>
+      </motion.table>
       {<p className='invalid'>{errormsg}</p>}
       <div className='buttons'>
-        <button onClick={resetHandler}>Reset</button>
-        <button onClick={randGenerator}>PLAY</button>
-        <button onClick={solveHandler}>Solve</button>
+        <motion.button
+          whileHover={{ scale: 1.1, backgroundColor: '#422dc6' }}
+          whileTap={{ scale: 0.9 }}
+          transition={{ type: 'spring', stiffness: 500 }}
+          onClick={resetHandler}>Reset</motion.button>
+        <motion.button
+          whileHover={{ scale: 1.1, backgroundColor: '#422dc6' }}
+          whileTap={{ scale: 0.9 }}
+          transition={{ type: 'spring', stiffness: 500 }}
+          onClick={randGenerator}>PLAY</motion.button>
+        <motion.button
+          whileHover={{ scale: 1.1, backgroundColor: '#422dc6' }}
+          whileTap={{ scale: 0.9 }}
+          transition={{ type: 'spring', stiffness: 500 }}
+          onClick={solveHandler}>Solve</motion.button>
       </div>
     </div>
   );
